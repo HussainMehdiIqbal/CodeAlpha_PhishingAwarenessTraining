@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phishing awareness training</title>
+<style>
+:root{
+  --bg:#f2f5f7; --surface:#ffffff; --ink:#14202b; --muted:#54636f; --line:#d5dde3;
+  --accent:#0d7a6b; --accent-ink:#ffffff; --accent-soft:#dff2ee;
+  --alert:#c2361f; --alert-soft:#fbe6e1; --ok:#1f7a3d; --ok-soft:#dff3e5; --warn-soft:#fff2cc;
+  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f171d; --surface:#17222b; --ink:#e7eef3; --muted:#9fb0bc; --line:#2b3a46;
+    --accent:#3cc5b0; --accent-ink:#06211c; --accent-soft:#12332f;
+    --alert:#ff7b63; --alert-soft:#3a1c17; --ok:#5fd483; --ok-soft:#15301e; --warn-soft:#3a3218;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f171d; --surface:#17222b; --ink:#e7eef3; --muted:#9fb0bc; --line:#2b3a46;
+  --accent:#3cc5b0; --accent-ink:#06211c; --accent-soft:#12332f;
+  --alert:#ff7b63; --alert-soft:#3a1c17; --ok:#5fd483; --ok-soft:#15301e; --warn-soft:#3a3218;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;font-size:17px}
+h1,h2,h3{font-family:var(--serif);line-height:1.2;margin:0 0 .5em;font-weight:700}
+h1{font-size:clamp(2rem,4.6vw,3.2rem)}
+h2{font-size:clamp(1.5rem,3vw,2.1rem)}
+h3{font-size:1.2rem}
+p{margin:0 0 1em;max-width:68ch}
+a{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.progress{position:fixed;top:0;left:0;height:4px;background:var(--accent);width:0;z-index:50;transition:width .15s}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:0;max-width:1180px;margin:0 auto}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;padding:28px 20px;border-right:1px solid var(--line);overflow:auto}
+nav.side .brand{font-family:var(--serif);font-weight:700;font-size:1.15rem;margin-bottom:22px;line-height:1.25}
+nav.side ol{list-style:none;margin:0;padding:0;counter-reset:m}
+nav.side li{counter-increment:m}
+nav.side a{display:flex;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:.95rem}
+nav.side a::before{content:counter(m);font-weight:700;min-width:1.2em}
+nav.side a:hover{background:var(--surface);color:var(--ink)}
+nav.side a.on{background:var(--accent-soft);color:var(--ink);font-weight:600}
+nav.side .score{margin-top:22px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:.9rem;color:var(--muted)}
+nav.side .score b{color:var(--ink);font-size:1.3rem;display:block}
+.themebtn{margin-top:14px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:.85rem}
+main{padding:0 clamp(18px,4vw,48px) 80px}
+section{padding:56px 0 8px;border-bottom:1px solid var(--line)}
+section:last-of-type{border-bottom:0}
+.lede{font-size:1.15rem;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:20px 0}
+.tag{display:inline-block;font-size:.8rem;padding:2px 9px;border-radius:99px;background:var(--accent-soft);margin-bottom:8px;font-weight:600}
+.tag.bad{background:var(--alert-soft);color:var(--alert)}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:10px 18px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.callout{border-left:5px solid var(--accent);background:var(--accent-soft);padding:14px 18px;border-radius:0 10px 10px 0;margin:20px 0}
+.callout.bad{border-color:var(--alert);background:var(--alert-soft)}
+
+/* hero email */
+.hero{padding-top:44px}
+.email{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:22px 0 10px;box-shadow:0 1px 0 var(--line)}
+.email .bar{display:flex;justify-content:space-between;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--line);font-size:.85rem;color:var(--muted);flex-wrap:wrap}
+.email .meta{padding:14px 18px;border-bottom:1px solid var(--line);font-size:.95rem}
+.email .meta div{margin:2px 0}
+.email .body{padding:18px;font-size:1rem}
+.hot{background:none;border:0;border-bottom:2px dotted var(--muted);color:inherit;padding:0;font:inherit;cursor:pointer;text-align:left}
+.hot:hover{background:var(--warn-soft)}
+.hot.found{border-bottom:2px solid var(--alert);background:var(--alert-soft)}
+.fakebtn{display:inline-block;background:#1a5fd0;color:#fff;padding:10px 20px;border-radius:6px;margin:6px 0;font-weight:600}
+.flagpanel{min-height:96px;margin-top:12px}
+.flagcount{display:flex;align-items:center;gap:12px;margin-top:8px;color:var(--muted)}
+.meter{flex:1;max-width:260px;height:10px;background:var(--line);border-radius:9px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--alert);transition:width .3s}
+
+/* url lab */
+.urlrow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.urlrow input{flex:1;min-width:220px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--mono);font-size:.95rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
+.chip{background:var(--surface);border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 12px;font-family:var(--mono);font-size:.82rem}
+.chip:hover{border-color:var(--accent)}
+.urlout{font-family:var(--mono);word-break:break-all;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.urlout .dom{background:var(--accent-soft);padding:1px 3px;border-radius:4px;font-weight:700}
+.urlout .other{color:var(--muted)}
+.findings{list-style:none;padding:0;margin:0}
+.findings li{padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:.95rem}
+.findings li.bad{background:var(--alert-soft)}
+.findings li.good{background:var(--ok-soft)}
+.findings li.info{background:var(--warn-soft)}
+.verdict{font-weight:700;margin:6px 0 10px}
+
+/* flip cards */
+.flip{perspective:900px;min-height:200px;background:none;border:0;padding:0;text-align:left;color:inherit}
+.flip .in{position:relative;width:100%;height:100%;min-height:200px;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;border:1px solid var(--line);padding:18px;overflow:auto}
+.flip .f{background:var(--surface)}
+.flip .b{background:var(--accent-soft);transform:rotateY(180deg);font-size:.94rem}
+.flip .f small{color:var(--muted)}
+
+/* cases */
+.case{display:grid;grid-template-columns:90px 1fr;gap:16px;padding:18px 0;border-top:1px solid var(--line)}
+.case .yr{font-family:var(--serif);font-size:1.7rem;font-weight:700;color:var(--alert)}
+.case h3{margin-bottom:.2em}
+.case .lesson{background:var(--accent-soft);padding:8px 12px;border-radius:8px;font-size:.95rem}
+@media(max-width:560px){.case{grid-template-columns:1fr}}
+
+/* quiz */
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin:28px 0}
+.quiz h3{margin-bottom:.6em}
+.q{margin:0 0 22px}
+.q p.qt{font-weight:600;margin-bottom:8px}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:10px 14px}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)}
+.opt.wrong{background:var(--alert-soft);border-color:var(--alert)}
+.why{margin-top:8px;font-size:.94rem;padding:10px 12px;border-radius:8px;background:var(--warn-soft)}
+.result{padding:14px;border-radius:10px;background:var(--accent-soft);font-weight:600}
+
+/* phish or legit */
+.mail{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;max-width:640px}
+.mail .from{font-family:var(--mono);font-size:.9rem;color:var(--muted)}
+.mail .sub{font-weight:700;margin:4px 0 8px}
+.mail .txt{margin-bottom:12px}
+.pl-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn.bad{background:var(--alert);color:#fff}
+.btn.good{background:var(--ok);color:#fff}
+.fb{margin-top:12px;padding:10px 12px;border-radius:8px}
+.fb.ok{background:var(--ok-soft)}.fb.no{background:var(--alert-soft)}
+
+/* checklist */
+.check{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.check label{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);padding:12px 14px;border-radius:10px;cursor:pointer}
+.check input{margin-top:5px;accent-color:var(--accent);width:18px;height:18px;flex:none}
+.check input:checked + span{color:var(--muted);text-decoration:line-through}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;padding:10px 0 10px 44px;position:relative;border-bottom:1px solid var(--line)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700}
+
+.cert{border:2px solid var(--accent);border-radius:14px;padding:28px;text-align:center;background:var(--surface);margin-top:18px}
+.cert .big{font-family:var(--serif);font-size:2.6rem;font-weight:700}
+.hidden{display:none}
+footer{padding:30px 0 0;color:var(--muted);font-size:.9rem}
+
+@media(max-width:820px){
+  .layout{grid-template-columns:1fr}
+  nav.side{position:sticky;height:auto;top:0;z-index:40;background:var(--bg);padding:8px 12px;border-right:0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;overflow-x:auto}
+  nav.side .brand,nav.side .score,.themebtn{display:none}
+  nav.side ol{display:flex;gap:4px}
+  nav.side a{white-space:nowrap;padding:6px 10px}
+}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="layout">
+<nav class="side" aria-label="Modules">
+  <div class="brand">Phishing awareness training</div>
+  <ol>
+    <li><a href="#m1">What phishing is</a></li>
+    <li><a href="#m2">Spot a phishing email</a></li>
+    <li><a href="#m3">Spot a fake website</a></li>
+    <li><a href="#m4">Social engineering</a></li>
+    <li><a href="#m5">Real-world attacks</a></li>
+    <li><a href="#m6">Stay protected</a></li>
+    <li><a href="#m7">Final assessment</a></li>
+  </ol>
+  <div class="score">Quiz points<b id="pts">0</b><span id="ptsmax">answer quizzes to earn points</span></div>
+  <button class="themebtn" id="theme">Switch light / dark</button>
+</nav>
+
+<main>
+<!-- HERO -->
+<section class="hero" id="top">
+  <h1>Something is wrong with this email. Can you find it?</h1>
+  <p class="lede">Phishing is the most common way attackers get into people and organizations. This module takes about 25 minutes. Start by inspecting the message below: click every detail that looks suspicious.</p>
+
+  <div class="email" aria-label="Sample suspicious email">
+    <div class="bar"><span>Inbox</span><span>Today, 8:52 AM</span></div>
+    <div class="meta">
+      <div><b>From:</b> <button class="hot" data-flag="sender">Microsoft Account Team &lt;security-alert@micros0ft-support.com&gt;</button></div>
+      <div><b>To:</b> undisclosed-recipients</div>
+      <div><b>Subject:</b> <button class="hot" data-flag="urgent">URGENT: Your account will be suspended in 24 hours</button></div>
+    </div>
+    <div class="body">
+      <p><button class="hot" data-flag="greeting">Dear Valued Customer,</button></p>
+      <p>We detected unusual sign-in activity on your account. <button class="hot" data-flag="grammar">Kindly to verify your identity immediately or your access are permanently closed.</button></p>
+      <p><span class="fakebtn" role="img" aria-label="fake button">Verify my account</span><br>
+      <button class="hot" data-flag="link">https://account-verify.micros0ft-support.com/login?id=88213</button></p>
+      <p>See the attached file for details: <button class="hot" data-flag="attach">Account_Statement.html.zip</button></p>
+      <p>Thank you,<br>Security Team</p>
+    </div>
+  </div>
+  <div class="flagcount"><span id="flagtxt">0 of 7 red flags found</span><div class="meter"><i id="flagbar"></i></div></div>
+  <div class="card flagpanel" id="flagpanel" aria-live="polite">Click a detail in the email to see why it matters.</div>
+</section>
+
+<!-- M1 -->
+<section id="m1">
+  <h2>1. What phishing is, and why it works</h2>
+  <p class="lede">Phishing is a fraud technique where an attacker pretends to be someone you trust in order to steal credentials, money or data, or to get you to install malware. It works because it targets people, not software.</p>
+  <div class="grid">
+    <div class="card"><span class="tag">Email</span><h3>Phishing</h3><p>Mass emails pretending to be banks, delivery firms or software vendors.</p></div>
+    <div class="card"><span class="tag">Targeted</span><h3>Spear phishing</h3><p>Personalized to you: your name, manager, project or supplier, often researched on LinkedIn.</p></div>
+    <div class="card"><span class="tag">Executives</span><h3>Whaling and BEC</h3><p>Impersonating or targeting senior leaders, often to request urgent payments (business email compromise).</p></div>
+    <div class="card"><span class="tag">SMS</span><h3>Smishing</h3><p>Text messages about parcels, tolls or bank alerts with a short link.</p></div>
+    <div class="card"><span class="tag">Phone</span><h3>Vishing</h3><p>Phone calls, sometimes with voice cloning, pretending to be IT support or your bank.</p></div>
+    <div class="card"><span class="tag">QR code</span><h3>Quishing</h3><p>QR codes in emails or on posters that lead to fake login pages and bypass email link scanners.</p></div>
+  </div>
+  <div class="callout"><b>The usual goal:</b> get you to do one of three things: enter a password, open a file, or send money or information. If a message pushes you toward any of these, slow down and verify.</div>
+
+  <div class="quiz" data-quiz="q1"></div>
+</section>
+
+<!-- M2 -->
+<section id="m2">
+  <h2>2. How to recognize a phishing email</h2>
+  <p class="lede">You already found the red flags in the sample above. Here they are as a working checklist. One flag is a reason for caution. Two or more is a reason to report.</p>
+  <div class="grid">
+    <div class="card"><h3>Check the sender</h3><p>Look at the actual address, not just the display name. Watch for lookalike domains (<code>micros0ft</code>, <code>paypa1</code>), free webmail addresses claiming to be a company, or a domain that does not match the brand.</p></div>
+    <div class="card"><h3>Check the tone</h3><p>Urgency, threats, prizes, secrecy, or "act now" pressure are designed to stop you from thinking.</p></div>
+    <div class="card"><h3>Check the links</h3><p>Hover (or long-press on mobile) to reveal the real destination before you click. The visible text can say anything.</p></div>
+    <div class="card"><h3>Check the ask</h3><p>Legitimate organizations rarely ask for passwords, one-time codes or payment by gift card over email.</p></div>
+    <div class="card"><h3>Check the attachment</h3><p>Be wary of unexpected .zip, .html, .iso, .exe, and Office files asking you to "enable macros" or "enable content".</p></div>
+    <div class="card"><h3>Check the details</h3><p>Generic greetings, odd phrasing, mismatched logos, and a reply-to address that differs from the sender are all clues. But polished text is not proof of safety, since AI now writes fluent phishing.</p></div>
+  </div>
+
+  <h3>Game: phish or legit?</h3>
+  <p>Six messages. Decide for each one.</p>
+  <div id="pl"></div>
+
+  <div class="quiz" data-quiz="q2"></div>
+</section>
+
+<!-- M3 -->
+<section id="m3">
+  <h2>3. How to recognize a fake website</h2>
+  <p class="lede">A fake site copies the look of a real one to capture what you type. The page can be pixel-perfect, so judge the address, not the appearance. The part of a web address that matters is the registered domain, which sits just before the first single slash and is read right to left through the dots.</p>
+
+  <div class="card">
+    <h3>URL inspector</h3>
+    <p>Type or paste any address, or pick an example. The tool highlights the real domain and lists warning signs. It works offline and never opens the link.</p>
+    <div class="chips" id="chips"></div>
+    <div class="urlrow"><input id="urlin" type="text" value="https://login.microsoftonline.com.secure-check.xyz/signin" aria-label="URL to inspect" spellcheck="false"><button class="btn" id="urlgo">Inspect</button></div>
+    <div id="urlout" aria-live="polite"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>Padlock does not mean safe</h3><p>HTTPS only means the connection is encrypted. Attackers get free certificates too, so a padlock says nothing about who owns the site.</p></div>
+    <div class="card"><h3>Go there yourself</h3><p>Instead of clicking, type the address or use a saved bookmark or the official app.</p></div>
+    <div class="card"><h3>Trick addresses</h3><p>Typosquatting (<code>arnazon.com</code>), extra words (<code>paypal-security.com</code>), lookalike characters (Cyrillic "а" vs Latin "a"), and brand names placed in subdomains.</p></div>
+    <div class="card"><h3>Use a password manager</h3><p>It fills credentials only on the exact saved domain. If it refuses to fill, treat that as an alarm.</p></div>
+  </div>
+
+  <div class="quiz" data-quiz="q3"></div>
+</section>
+
+<!-- M4 -->
+<section id="m4">
+  <h2>4. Social engineering: the psychology behind the scam</h2>
+  <p class="lede">Attackers exploit normal human instincts. Tap each card to see how the tactic sounds in real life and how to counter it.</p>
+  <div class="grid" id="flips"></div>
+  <div class="callout bad"><b>Rule of thumb:</b> when a message makes you feel rushed, scared, flattered or excited, that feeling is the signal. Pause and verify through a channel you already trust.</div>
+
+  <div class="quiz" data-quiz="q4"></div>
+</section>
+
+<!-- M5 -->
+<section id="m5">
+  <h2>5. Real-world examples</h2>
+  <p class="lede">These are well documented incidents. Each began with a message aimed at a person.</p>
+  <div class="case"><div class="yr">2013</div><div>
+    <h3>Target: an HVAC supplier as the way in</h3>
+    <p>Attackers phished a refrigeration and HVAC contractor that worked with the US retailer Target, stole its network credentials, and eventually reached Target's payment systems. Around 40 million payment cards were exposed.</p>
+    <div class="lesson">Lesson: your supply chain is part of your attack surface, and one stolen login can open a path to the crown jewels.</div></div></div>
+  <div class="case"><div class="yr">2013–15</div><div>
+    <h3>Fake invoices at Google and Facebook</h3>
+    <p>A Lithuanian man impersonated a real hardware supplier, sending forged invoices, contracts and emails to accounts payable staff at both companies. Together they paid out over $100 million before the fraud was caught, and most of it was later recovered.</p>
+    <div class="lesson">Lesson: even technology giants lose money to convincing paperwork. Verify payment or bank detail changes by phone using a known number.</div></div></div>
+  <div class="case"><div class="yr">2016</div><div>
+    <h3>The Podesta email compromise</h3>
+    <p>The campaign chairman of a US presidential campaign received a fake "Google security alert" telling him to change his password. The link led to a lookalike page, and thousands of emails were later leaked. A shortened link hid the real destination.</p>
+    <div class="lesson">Lesson: security alerts are a favorite disguise. Open the real site yourself rather than following the link.</div></div></div>
+  <div class="case"><div class="yr">2020</div><div>
+    <h3>Twitter: a phone-based social engineering attack</h3>
+    <p>Attackers phoned Twitter employees pretending to be internal IT and steered them to a fake login page. With the stolen credentials they took over high-profile accounts and ran a cryptocurrency scam.</p>
+    <div class="lesson">Lesson: vishing works on technical staff too. Call back through an internal directory number, not the caller's.</div></div></div>
+  <div class="case"><div class="yr">2022</div><div>
+    <h3>Uber: MFA fatigue</h3>
+    <p>After obtaining a contractor's password, an attacker repeatedly triggered multi-factor approval prompts, then messaged the victim on WhatsApp pretending to be IT and telling them to approve one. They did, and the attacker got in.</p>
+    <div class="lesson">Lesson: never approve a prompt you did not start. Report unexpected MFA requests immediately.</div></div></div>
+
+  <div class="quiz" data-quiz="q5"></div>
+</section>
+
+<!-- M6 -->
+<section id="m6">
+  <h2>6. Best practices to avoid falling victim</h2>
+  <p class="lede">Tick each habit you commit to adopting. Nothing is saved or sent anywhere.</p>
+  <ul class="check" id="checklist"></ul>
+
+  <h3 style="margin-top:32px">If you clicked or entered something</h3>
+  <p>Mistakes happen, and speed matters more than embarrassment. Reporting quickly is the most valuable thing you can do.</p>
+  <ol class="steps">
+    <li><b>Stop.</b> Do not keep interacting with the page, file or caller.</li>
+    <li><b>Disconnect</b> the device from the network if you opened a suspicious attachment.</li>
+    <li><b>Report it</b> right away to your IT or security team, and use the report-phishing button if your mail client has one.</li>
+    <li><b>Change the password</b> for the affected account (and anywhere it was reused) from a clean device, and revoke active sessions.</li>
+    <li><b>Watch for follow-up.</b> Check bank and account activity, and tell the finance team if money or bank details were involved.</li>
+  </ol>
+</section>
+
+<!-- M7 -->
+<section id="m7">
+  <h2>7. Final assessment</h2>
+  <p class="lede">Ten questions covering the whole module. You need 8 or more correct to pass.</p>
+  <div class="quiz" data-quiz="final"></div>
+  <div id="cert"></div>
+  <footer>This training uses fictional example messages. Case studies are summarized from public reporting; details are simplified. Follow your organization's own reporting procedure.</footer>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+
+/* theme + progress + nav highlight */
+$("#theme").onclick=function(){var r=document.documentElement;var dark=(r.getAttribute("data-theme")==="dark")||(!r.getAttribute("data-theme")&&window.matchMedia("(prefers-color-scheme: dark)").matches);r.setAttribute("data-theme",dark?"light":"dark")};
+var links=$$("nav.side a");var secs=links.map(function(a){return $(a.getAttribute("href"))});
+function onScroll(){
+  var h=document.documentElement;var p=h.scrollTop/(h.scrollHeight-h.clientHeight||1);
+  $("#prog").style.width=(p*100)+"%";
+  var cur=-1;secs.forEach(function(s,i){if(s.getBoundingClientRect().top<window.innerHeight*0.4)cur=i});
+  links.forEach(function(a,i){a.classList.toggle("on",i===cur)});
+}
+window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+
+/* hero flags */
+var flags={
+ sender:["Spoofed sender domain","The address ends in <code>micros0ft-support.com</code> with a zero instead of the letter o. Microsoft never emails from that domain."],
+ urgent:["Artificial urgency","A 24-hour deadline and a threat of suspension are pressure tactics meant to stop you from checking."],
+ greeting:["Generic greeting and hidden recipients","Real providers usually address you by name. Here the message went to \"undisclosed recipients\", meaning it was mass-mailed."],
+ grammar:["Awkward language","Broken grammar is a classic clue, though modern AI-written phishing may be flawless, so do not rely on this alone."],
+ link:["Lookalike link","The domain is <code>micros0ft-support.com</code>, and \"account-verify\" is only a subdomain. The real domain is the last two parts before the path."],
+ attach:["Dangerous attachment","A .html file inside a .zip is a common way to deliver fake login pages or malware. Security teams do not send account details this way."]
+};
+/* 7th flag: fake button hides the link. Count 6 hot spots + the button */
+var found={};var total=7;
+$$(".hot").forEach(function(b){b.onclick=function(){
+  var k=b.getAttribute("data-flag");found[k]=1;b.classList.add("found");
+  $("#flagpanel").innerHTML="<b>"+flags[k][0]+"</b><br>"+flags[k][1];
+  update();
+}});
+$(".fakebtn").tabIndex=0;
+$(".fakebtn").onclick=$(".fakebtn").onkeydown=function(e){if(e.type==="keydown"&&e.key!=="Enter"&&e.key!==" ")return;
+  found.button=1;this.style.outline="3px solid var(--alert)";
+  $("#flagpanel").innerHTML="<b>Button text hides the destination</b><br>Buttons can show any label while pointing somewhere else. Hover to reveal where it really goes.";update()};
+function update(){var n=Object.keys(found).length;$("#flagtxt").textContent=n+" of "+total+" red flags found"+(n===total?" - nice work, that is every one.":"");$("#flagbar").style.width=(n/total*100)+"%"}
+
+/* quiz engine */
+var Q={
+q1:{title:"Check your understanding: basics",items:[
+ {q:"Which best describes spear phishing?",o:["A phishing attack sent to millions at random","A message tailored to a specific person or organization","A phone call from a recorded voice","Malware that spreads by USB stick"],a:1,w:"Spear phishing uses personal or organizational details to look credible, which makes it more effective than bulk phishing."},
+ {q:"You get a text that says your parcel is held and asks you to pay a small fee via a link. This is called:",o:["Vishing","Smishing","Whaling","Tailgating"],a:1,w:"Smishing is phishing by SMS. Delivery and toll fee texts are among the most common."},
+ {q:"What are most phishing attacks ultimately trying to get you to do?",o:["Update your antivirus","Enter credentials, open a file or send money/info","Restart your computer","Join a newsletter"],a:1,w:"Nearly every phishing attempt pushes toward one of those three actions."}]},
+q2:{title:"Check your understanding: emails",items:[
+ {q:"Which sender address is most suspicious for a message claiming to be from PayPal?",o:["service@paypal.com","service@paypal.com.account-help.net","noreply@e.paypal.com","help@paypal.com"],a:1,w:"The real domain is account-help.net. PayPal only appears as a subdomain in front of it."},
+ {q:"You hover over a link labeled \"View invoice\" and the preview shows a random unfamiliar domain. What should you do?",o:["Click it, since the label says invoice","Do not click; verify with the sender another way","Forward it to coworkers","Reply asking if it's safe"],a:1,w:"The visible label means nothing. Verify through a separate channel and report if it seems fake."},
+ {q:"An email that looks perfectly written and personal is therefore...",o:["Definitely safe","Probably from a colleague","Still possibly phishing","Never from an attacker"],a:2,w:"AI tools and stolen data let attackers produce polished, personalized messages. Judge by the ask and the sender's real address."}]},
+q3:{title:"Check your understanding: websites",items:[
+ {q:"Which is the real registered domain in https://secure.bank-login.example.com/verify ?",o:["secure","bank-login","example.com","verify"],a:2,w:"Read the domain right to left before the first single slash: example.com. Everything to its left is a subdomain the owner controls."},
+ {q:"A site shows a padlock icon. What does this tell you?",o:["The site is owned by a trusted company","The connection is encrypted, nothing about who runs it","The site is free of malware","The page passed a security audit"],a:1,w:"Phishing sites commonly use HTTPS. The padlock only means the connection is encrypted."},
+ {q:"The safest way to reach your bank after receiving an alert email is to:",o:["Click the link in the email","Call the number in the email","Type the address or use your saved bookmark or official app","Search for a phone number in a forum"],a:2,w:"Going directly to a source you already trust sidesteps the fake link completely."}]},
+q4:{title:"Check your understanding: social engineering",items:[
+ {q:"A caller says they are from IT, claims your account is compromised and needs your one-time code right now. The best response is:",o:["Read the code, since they are helping","Hang up and call IT back on the number from the internal directory","Ask them to send an email","Give only half the code"],a:1,w:"Legitimate IT never needs your one-time code. Call back using a trusted number."},
+ {q:"\"Your boss needs gift cards today. Keep it confidential.\" Which tactics are used?",o:["Authority, urgency and secrecy","Reciprocity and curiosity","Baiting and tailgating","None, it is a normal request"],a:0,w:"Impersonating authority with urgency and secrecy is the standard CEO-fraud pattern."},
+ {q:"You find a USB stick labeled \"Salary 2026\" in the car park. What should you do?",o:["Plug it in to find the owner","Give it to IT or security without plugging it in","Take it home","Plug it into an old laptop"],a:1,w:"This is baiting. Unknown USB devices can run malicious code as soon as they are connected."}]},
+q5:{title:"Check your understanding: real attacks",items:[
+ {q:"In the Google and Facebook invoice fraud, what was the key control that would have caught it?",o:["A stronger antivirus","Verifying payment details through a separate trusted channel","Blocking all email","A longer password"],a:1,w:"The attacker used a fake but plausible supplier identity. Out-of-band verification of payment changes exposes it."},
+ {q:"In the Uber case, the attacker repeatedly sent MFA prompts. What should the user have done?",o:["Approve one so they stop","Deny and report the unexpected prompts","Ignore them forever","Share the code with support"],a:1,w:"Unexpected MFA prompts mean someone has your password. Deny and report immediately."}]},
+final:{title:"Final assessment",items:[
+ {q:"Which email address is a lookalike of microsoft.com?",o:["support@microsoft.com","support@micros0ft.com","support@microsoft.com.au","support@office.microsoft.com"],a:1,w:"A zero replaces the letter o."},
+ {q:"You receive an unexpected invoice PDF from a known supplier who has never emailed you invoices before. First step?",o:["Open it quickly","Contact the supplier using a known number to confirm","Forward it to finance","Reply asking if it is real"],a:1,w:"Verify through a channel you already trust, not the one in the message."},
+ {q:"What is the best defense against a fake login page that looks perfect?",o:["Trusting the logo","Checking for a padlock","Using a password manager and phishing-resistant MFA","Reading the page for typos"],a:2,w:"Password managers only autofill on the true domain, and passkeys or security keys cannot be replayed on a fake site."},
+ {q:"Which is NOT a common social engineering trigger?",o:["Urgency","Authority","Fear of missing out on a prize","A calm, detailed request with a way to verify"],a:3,w:"Legitimate requests allow time and verification. Attackers avoid both."},
+ {q:"You realize you entered your password on a suspicious page. What is the most important next action?",o:["Hope nothing happens","Report to IT and change the password from a clean device","Delete the email and stay quiet","Wait a week and see"],a:1,w:"Fast reporting limits damage. Change the password and revoke sessions."},
+ {q:"What does the padlock icon in the browser guarantee?",o:["The site is legitimate","The site has no malware","The connection is encrypted","The owner is verified"],a:2,w:"It guarantees encryption only."},
+ {q:"A text says your bank account is locked and gives a shortened link. Best action?",o:["Tap the link to check","Open your banking app or type the address yourself","Reply STOP","Forward it to friends"],a:1,w:"Never use links in unexpected alerts. Go to the official app or site."},
+ {q:"Tailgating is when someone:",o:["Follows your emails closely","Follows you through a secured door without badging in","Uses your Wi-Fi","Copies your passwords"],a:1,w:"Physical social engineering. Politely ask visitors to sign in or use reception."},
+ {q:"Which link's real domain is paypal.com?",o:["https://paypal.com.verify-login.net","https://www.paypal.com/signin","https://paypal-secure.co/login","https://login.paypal.com@evil.example"],a:1,w:"In the last option, everything before the @ is ignored and the browser goes to evil.example."},
+ {q:"You see a colleague's account sending odd messages asking for gift cards. You should:",o:["Ignore it","Report it to security and tell the colleague through another channel","Reply with the cards","Block them"],a:1,w:"Their account may be compromised. Report so the account can be secured."}]}
+};
+var totalPts=0,earned=0,answered={};
+Object.keys(Q).forEach(function(k){totalPts+=Q[k].items.length});
+function renderQuiz(box){
+  var key=box.getAttribute("data-quiz");var cfg=Q[key];var done=0,right=0;
+  box.appendChild(el("h3","",cfg.title));
+  cfg.items.forEach(function(it,qi){
+    var d=el("div","q");d.appendChild(el("p","qt",(qi+1)+". "+it.q));
+    var o=el("div","opts");
+    it.o.forEach(function(t,oi){
+      var b=el("button","opt");b.textContent=t;b.onclick=function(){
+        $$(".opt",o).forEach(function(x){x.disabled=true});
+        var ok=oi===it.a;b.classList.add(ok?"right":"wrong");
+        if(!ok)$$(".opt",o)[it.a].classList.add("right");
+        d.appendChild(el("div","why",(ok?"Correct. ":"Not quite. ")+it.w));
+        done++;if(ok){right++;earned++}
+        $("#pts").textContent=earned;$("#ptsmax").textContent="out of "+totalPts+" available";
+        if(done===cfg.items.length){
+          var r=el("div","result","You scored "+right+" of "+cfg.items.length+".");
+          box.appendChild(r);
+          if(key==="final")showCert(right,cfg.items.length);
+        }
+      };o.appendChild(b)});
+    d.appendChild(o);box.appendChild(d)});
+}
+$$(".quiz").forEach(renderQuiz);
+function showCert(r,n){
+  var pass=r>=8;var c=$("#cert");
+  c.innerHTML="";
+  var d=el("div","cert");
+  d.innerHTML=pass?
+   "<div class='big'>"+r+" / "+n+"</div><h3>You passed the phishing awareness assessment</h3><p style='margin:0 auto 1em'>Keep the habits from module 6: pause, check the sender, verify by another channel, and report quickly. You are now part of the defense.</p>":
+   "<div class='big'>"+r+" / "+n+"</div><h3>Almost there</h3><p style='margin:0 auto 1em'>You need 8 to pass. Review the modules, then try again.</p>";
+  var b=el("button","btn",pass?"Retake for practice":"Try again");
+  b.onclick=function(){var q=$('[data-quiz="final"]');q.innerHTML="";c.innerHTML="";earned-=r;$("#pts").textContent=earned;renderQuiz(q);q.scrollIntoView({behavior:"smooth"})};
+  d.appendChild(b);c.appendChild(d);
+}
+
+/* phish or legit */
+var PL=[
+ {f:"IT Helpdesk <helpdesk@company-support.co>",s:"Mailbox full: verify within 24 hours",t:"Your mailbox has reached its limit. Click here to sign in and avoid losing messages.",p:true,w:"Generic sender domain not owned by your company, urgency and a login link."},
+ {f:"GitHub <noreply@github.com>",s:"A new sign-in to your account",t:"We noticed a sign-in from a new device. If this was you, no action is needed.",p:false,w:"Legit-looking and asks for nothing. Even so, if unsure, open the site yourself to review sessions rather than clicking."},
+ {f:"CEO Name <ceo.name.office@gmail.com>",s:"Quick favor, keep this between us",t:"I'm in a meeting and can't talk. Buy 5 gift cards of $100 and send me the codes. I'll reimburse you.",p:true,w:"Free webmail address, secrecy, an unusual payment method and authority pressure: the classic CEO fraud."},
+ {f:"Amazon <order-update@amazon.com.delivery-check.net>",s:"Your package could not be delivered",t:"Confirm your address and pay a $1.99 redelivery fee to avoid return.",p:true,w:"The real domain is delivery-check.net. Amazon appears only as a subdomain."},
+ {f:"HR <hr@yourcompany.com>",s:"Calendar invite: Benefits enrolment Q&A, Thursday 2pm",t:"Invitation to the session announced in last week's all-hands. No links or attachments beyond the calendar entry.",p:false,w:"Expected, correct internal domain and no risky ask. You can also confirm in the company calendar."},
+ {f:"PayPal <service@paypa1.com>",s:"Unusual activity: log in now",t:"We limited your account. Log in immediately to restore access.",p:true,w:"The domain paypa1.com uses a number 1 in place of l."}
+];
+var pi=0,ps=0;
+function plRender(){
+  var box=$("#pl");box.innerHTML="";
+  if(pi>=PL.length){var d=el("div","result","You got "+ps+" of "+PL.length+" right.");var b=el("button","btn ghost","Play again");b.style.marginLeft="12px";b.onclick=function(){pi=0;ps=0;plRender()};d.appendChild(b);box.appendChild(d);return}
+  var m=PL[pi];var c=el("div","mail");
+  c.innerHTML="<div class='from'>From: "+m.f.replace(/</g,"&lt;")+"</div><div class='sub'>"+m.s+"</div><div class='txt'>"+m.t+"</div>";
+  var a=el("div","pl-actions");var bp=el("button","btn bad","Phish"),bl=el("button","btn good","Legit");
+  function ans(g){bp.disabled=bl.disabled=true;var ok=g===m.p;if(ok)ps++;
+    var fb=el("div","fb "+(ok?"ok":"no"),"<b>"+(ok?"Correct.":"Not this time.")+"</b> This one is "+(m.p?"phishing":"legitimate")+". "+m.w);
+    var nx=el("button","btn",pi===PL.length-1?"See result":"Next message");nx.style.marginTop="10px";nx.onclick=function(){pi++;plRender()};
+    c.appendChild(fb);c.appendChild(nx);nx.focus()}
+  bp.onclick=function(){ans(true)};bl.onclick=function(){ans(false)};
+  a.appendChild(bp);a.appendChild(bl);c.appendChild(a);
+  c.appendChild(el("p","",""));c.lastChild.style.cssText="margin:10px 0 0;color:var(--muted);font-size:.85rem";c.lastChild.textContent="Message "+(pi+1)+" of "+PL.length;
+  box.appendChild(c);
+}
+plRender();
+
+/* URL inspector */
+var SAMPLES=["https://www.paypal.com/signin","https://paypal.com.verify-login.net/","https://login.microsoftonline.com.secure-check.xyz/signin","http://192.168.4.20/bank/login","https://accounts.google.com@evil.example/login","https://bit.ly/3xYzAbC","https://arnazon.com/orders","https://xn--pple-43d.com/id"];
+SAMPLES.forEach(function(s){var b=el("button","chip");b.textContent=s.replace(/^https?:\/\//,"").slice(0,34);b.onclick=function(){$("#urlin").value=s;inspect()};$("#chips").appendChild(b)});
+var BRANDS=["paypal","microsoft","microsoftonline","google","apple","amazon","netflix","facebook","instagram","bank","dhl","fedex","office365","outlook","docusign","linkedin"];
+var RISKY_TLD=["xyz","top","click","icu","zip","mov","support","live","cam","tk","gq","ml","cf","work","rest","buzz"];
+var SHORT=["bit.ly","tinyurl.com","t.co","goo.gl","ow.ly","is.gd","cutt.ly","rb.gy"];
+var TWO=["co.uk","com.au","co.in","co.jp","com.br","co.nz","com.pk","org.uk","co.za"];
+function inspect(){
+  var raw=$("#urlin").value.trim();var out=$("#urlout");out.innerHTML="";
+  if(!raw){out.textContent="Enter a URL to inspect.";return}
+  var u;try{u=new URL(/^[a-z]+:\/\//i.test(raw)?raw:"https://"+raw)}catch(e){out.textContent="That does not look like a valid URL.";return}
+  var host=u.hostname.toLowerCase();var parts=host.split(".");
+  var isIP=/^\d{1,3}(\.\d{1,3}){3}$/.test(host);
+  var last2=parts.slice(-2).join(".");var last3=parts.slice(-3).join(".");
+  var reg=isIP?host:(TWO.indexOf(last2)>-1?last3:last2);
+  var sub=isIP?"":host.slice(0,host.length-reg.length).replace(/\.$/,"");
+  var f=[];var score=0;
+  function add(t,m,p){f.push([t,m]);score+=p}
+  if(u.protocol!=="https:")add("bad","Not using HTTPS, so data is not encrypted in transit.",1);
+  else add("info","Uses HTTPS. That only means the connection is encrypted; it does not prove the site is genuine.",0);
+  if(raw.indexOf("@")>-1&&u.username)add("bad","Contains an @ sign. Everything before it is ignored by the browser, so the real destination is <b>"+host+"</b>.",3);
+  if(isIP)add("bad","Uses a raw IP address instead of a domain name.",3);
+  if(host.indexOf("xn--")>-1)add("bad","Punycode (xn--) can hide lookalike foreign characters, e.g. a Cyrillic letter that looks Latin.",3);
+  if(SHORT.indexOf(host)>-1)add("info","URL shortener: the final destination is hidden. Preview it before opening or avoid it.",1);
+  var regLabel=reg.split(".")[0];
+  var brandInSub=BRANDS.filter(function(b){return sub.indexOf(b)>-1});
+  if(brandInSub.length&&BRANDS.indexOf(regLabel)===-1)add("bad","The brand name \""+brandInSub[0]+"\" appears in the subdomain, but the registered domain is <b>"+reg+"</b>. This is a common disguise.",3);
+  var brandInReg=BRANDS.filter(function(b){return regLabel.indexOf(b)>-1&&regLabel!==b});
+  if(brandInReg.length&&!isIP)add("bad","The domain <b>"+reg+"</b> contains \""+brandInReg[0]+"\" plus extra words. Real brands rarely use hyphenated variants.",2);
+  if(/[0-9]/.test(regLabel)&&/[a-z]/.test(regLabel)&&!isIP&&/(0|1|3|5)/.test(regLabel)&&BRANDS.some(function(b){return regLabel.replace(/0/g,"o").replace(/1/g,"l").replace(/3/g,"e").replace(/5/g,"s").indexOf(b)>-1}))add("bad","Numbers replace letters in the domain name (like 0 for o), a typical lookalike trick.",3);
+  if(regLabel==="arnazon"||regLabel==="rnicrosoft"||/rn/.test(regLabel)&&BRANDS.some(function(b){return regLabel.replace(/rn/g,"m").indexOf(b)>-1||regLabel.replace(/rn/g,"m")===b}))add("bad","\"rn\" can imitate the letter \"m\". Read the domain slowly.",3);
+  if(regLabel==="arnazon")add("bad","Looks like \"amazon\" but is actually \"arnazon\".",1);
+  var tld=parts[parts.length-1];
+  if(RISKY_TLD.indexOf(tld)>-1)add("bad","The .<b>"+tld+"</b> ending is heavily abused by cheap throwaway domains.",1);
+  if(parts.length>4)add("bad","Very many subdomains, which is a way to bury the real domain.",1);
+  if((host.match(/-/g)||[]).length>=2)add("info","Multiple hyphens in the hostname, which is common in fake domains.",1);
+  if(u.pathname.toLowerCase().match(/login|signin|verify|secure|update|account/)&&score>0)add("info","The path mentions login or verification, which is what a credential-stealing page usually says.",1);
+  if(!f.some(function(x){return x[0]==="bad"}))add("good","No obvious tricks found in the address itself. Still confirm you reached it by typing or a trusted bookmark.",0);
+  var pretty=isIP?'<span class="dom">'+host+'</span>':(sub?'<span class="other">'+sub+'.</span>':"")+'<span class="dom">'+reg+'</span>';
+  var o=el("div","urlout","<span class='other'>"+u.protocol+"//</span>"+pretty+"<span class='other'>"+u.pathname+u.search+"</span>");
+  out.appendChild(o);
+  var v=score>=3?"High risk: do not enter any information.":score>=1?"Suspicious: verify before proceeding.":"Nothing alarming in the address.";
+  var vd=el("div","verdict",v);vd.style.color=score>=3?"var(--alert)":score>=1?"inherit":"var(--ok)";
+  out.appendChild(vd);
+  var ul=el("ul","findings");f.forEach(function(x){ul.appendChild(el("li",x[0],x[1]))});out.appendChild(ul);
+  out.appendChild(el("p","","<small>Highlighted part = the registered domain, who really controls the site.</small>"));
+}
+$("#urlgo").onclick=inspect;$("#urlin").onkeydown=function(e){if(e.key==="Enter")inspect()};inspect();
+
+/* flip cards */
+var TAC=[
+ ["Urgency","\"Act in 30 minutes or your account is closed.\"","Time pressure shuts down careful thinking. <b>Counter:</b> real problems survive a five-minute check. Verify through official channels."],
+ ["Authority","\"This is the CEO / IRS / your bank's fraud team.\"","We obey people who seem to be in charge. <b>Counter:</b> verify identity by calling a known number, however senior the person claims to be."],
+ ["Fear","\"Suspicious activity detected. Your data may be exposed.\"","Fear makes us act first. <b>Counter:</b> take a breath and go to the real site yourself."],
+ ["Greed and reward","\"You won a prize!\" \"Claim your refund.\"","Rewards lower our guard. <b>Counter:</b> if you did not enter a contest, you did not win one."],
+ ["Curiosity","\"Photos from last night's party.pdf\"","Teasers make us click. <b>Counter:</b> unexpected attachment with a vague hook? Ask the sender by another channel."],
+ ["Helpfulness and reciprocity","\"Could you quickly help me with this? I did you a favor before.\"","Most of us want to be helpful. <b>Counter:</b> polite verification is normal, and real colleagues will understand."],
+ ["Pretexting","A caller invents a believable story: \"I'm from IT doing an audit.\"","A fabricated scenario builds trust step by step. <b>Counter:</b> call back via the internal directory; share nothing sensitive inbound."],
+ ["Baiting and tailgating","A USB labeled \"Salary 2026\"; someone carrying boxes asks you to hold the door.","Physical tricks exploit kindness and curiosity. <b>Counter:</b> hand found devices to IT, and direct visitors to reception."]
+];
+TAC.forEach(function(t){
+  var b=el("button","flip");b.setAttribute("aria-pressed","false");b.style.minHeight="210px";
+  b.innerHTML="<div class='in'><div class='f'><span class='tag bad'>Tactic</span><h3>"+t[0]+"</h3><p><small>"+t[1]+"</small></p><small>Tap to see the counter</small></div><div class='b'>"+t[2]+"</div></div>";
+  b.onclick=function(){var on=b.classList.toggle("on");b.setAttribute("aria-pressed",on)};
+  $("#flips").appendChild(b)});
+
+/* checklist */
+var CL=["Pause on any message that creates urgency, fear or excitement.","Check the real sender address and the real link destination before acting.","Type addresses or use bookmarks and official apps for banking and work logins.","Use a password manager and a unique password for every account.","Turn on multi-factor authentication, preferring passkeys or security keys where offered.","Never share one-time codes or approve prompts you did not start.","Verify payment or bank detail changes by calling a known number.","Keep devices, browsers and apps updated.","Do not open unexpected attachments or enable macros or content.","Report suspicious messages using your organization's process, even if you did not click."];
+CL.forEach(function(t){var li=el("li");li.innerHTML="<label><input type='checkbox'><span>"+t+"</span></label>";$("#checklist").appendChild(li)});
+})();
+</script>
+</body>
+</html>
