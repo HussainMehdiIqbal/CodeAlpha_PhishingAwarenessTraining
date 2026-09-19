@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/fb6be62a-fa96-404e-be28-2ec4ef7d542d
+
 # Phishing Awareness Training
 
 An interactive, single-page training module that teaches people how to recognize and avoid phishing attacks. It covers phishing emails, fake websites, social engineering tactics, real-world incidents and best practices, with hands-on exercises and quizzes throughout.
